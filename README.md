@@ -21,4 +21,4 @@ If you're interested in how SpeakDict works, feel free to
 * Browse the source code: https://github.com/Jyotirdeb/speakdict
 * Submit an issue: https://github.com/Jyotirdeb/speakdict/issues
 
-SpeakDict is a completely free and open-source app, developed as a hobby on free time by one developer.  The developer makes no money off this app, and has zero interest in your personal data.
+<b>Note:</b> SpeakDict is a completely free and open-source app, developed as a hobby on free time by me.  I earn no money from this app, and I have zero interest in your personal data.
