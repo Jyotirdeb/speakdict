@@ -1,4 +1,4 @@
-This is the license for the Poet Assistant software.
+This is the license for the SpeakDict software.
 
 The licenses for the rhyming dictionary, thesaurus and dictionary data
 are provided separately.
