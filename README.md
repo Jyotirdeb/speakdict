@@ -9,11 +9,12 @@ SpeakDict
 <br>
 <br>
 <br>
-SpeakDict is an Android app which offers a set of tools to help with dictionary and it also has an inbuilt poem speaker :
-* A rhyming dictionary, using the Carnegie Mellon University pronunciation dictionary.
-* A thesaurus, using the WordNet thesaurus.
-* A dictionary, using the WordNet dictionary.
-* A screen where you can enter your poem text, and have it read aloud back to you by the device's text-to-speech engine (TTS).
+
+SpeakDict is an Android app which offers a set of tools to help with dictionary and it also has an inbuilt poem speaker :<br>
+* A rhyming dictionary, using the Carnegie Mellon University pronunciation dictionary.<br>
+* A thesaurus, using the WordNet thesaurus.<br>
+* A dictionary, using the WordNet dictionary.<br>
+* A screen where you can enter your poem text, and have it read aloud back to you by the device's text-to-speech engine (TTS).<br>
 
 --------------
 
