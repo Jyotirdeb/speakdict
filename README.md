@@ -14,3 +14,11 @@ SpeakDict is an Android app which offers a set of tools to help with dictionary 
 * A thesaurus, using the WordNet thesaurus.
 * A dictionary, using the WordNet dictionary.
 * A screen where you can enter your poem text, and have it read aloud back to you by the device's text-to-speech engine (TTS).
+
+--------------
+
+If you're interested in how SpeakDict works, feel free to
+* Browse the source code: https://github.com/Jyotirdeb/speakdict
+* Submit an issue: https://github.com/Jyotirdeb/speakdict/issues
+
+SpeakDict is a completely free and open-source app, developed as a hobby on free time by one developer.  The developer makes no money off this app, and has zero interest in your personal data.
