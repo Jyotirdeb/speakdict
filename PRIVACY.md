@@ -20,7 +20,7 @@ More questions?
 --------------
 
 If you're interested in how SpeakDict works, feel free to 
-* browse the source code: https://github.com/Jyotirdeb/speakdict
-* submit an issue: https://github.com/Jyotirdeb/speakdict/issues
+* Browse the source code: https://github.com/Jyotirdeb/speakdict
+* Submit an issue: https://github.com/Jyotirdeb/speakdict/issues
 
 SpeakDict is a completely free and open-source app, developed as a hobby on free time by one developer.  The developer makes no money off this app, and has zero interest in your personal data.
