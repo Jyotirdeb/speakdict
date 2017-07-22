@@ -8,7 +8,7 @@ SpeakDict
 <img src="https://assets-cdn.github.com/images/modules/logos_page/GitHub-Logo.png" alt="Get it on GitHub" height="80"/></a>
 <br>
 <br>
-
+<br>
 SpeakDict is an Android app which offers a set of tools to help with dictionary and it also has an inbuilt poem speaker :
 * A rhyming dictionary, using the Carnegie Mellon University pronunciation dictionary.
 * A thesaurus, using the WordNet thesaurus.
