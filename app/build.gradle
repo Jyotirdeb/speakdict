@@ -1,0 +1,225 @@
+/*
+ * Copyright (c) 2016-2017 Jyotirdeb Mukherjee
+ *
+ * This file is part of SpeakDict.
+ *
+ * SpeakDict is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SpeakDict is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with SpeakDict.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.github.ben-manes.versions'
+apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'jacoco'
+
+
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    lintOptions {
+        abortOnError true
+        textReport true
+        ignoreWarnings true
+    }
+
+    defaultConfig {
+        applicationId "com.thearch.speakdict"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 12017
+        versionName "1.20.17"
+        // setting vectorDrawables.useSupportLibrary = true means pngs won't be generated at
+        // build time: http://android-developers.blogspot.fr/2016/02/android-support-library-232.html
+        vectorDrawables.useSupportLibrary = true
+        jackOptions {
+            enabled false // too slow! :(
+        }
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+            applicationIdSuffix = ".test"
+            resValue "string", "search_provider_authority", android.defaultConfig.applicationId + applicationIdSuffix + ".SuggestionsProvider";
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "search_provider_authority", android.defaultConfig.applicationId + ".SuggestionsProvider";
+        }
+    }
+
+    testOptions {
+        unitTests.all {
+            jacoco {
+                includeNoLocationClasses = true
+            }
+        }
+    }
+
+    if (rootProject.hasProperty("AndroidSigningKeyAlias")
+            && rootProject.hasProperty("AndroidSigningKeyPassword")
+            && rootProject.hasProperty("AndroidSigningStoreFile")
+            && rootProject.hasProperty("AndroidSigningStorePassword")) {
+        println "Using signing properties from gradle properties"
+        signingConfigs {
+            release {
+                keyAlias rootProject.AndroidSigningKeyAlias
+                keyPassword rootProject.AndroidSigningKeyPassword
+                storeFile file(rootProject.AndroidSigningStoreFile)
+                storePassword rootProject.AndroidSigningStorePassword
+            }
+            android.buildTypes.release.signingConfig = signingConfigs.release
+        }
+    } else if (System.env.AndroidSigningKeyPassword != null
+            && System.env.AndroidSigningKeyPassword != null
+            && System.env.AndroidSigningStoreFile != null
+            && System.env.AndroidSigningStorePassword != null) {
+        println "Using signing properties from environment variables"
+        signingConfigs {
+            release {
+                keyAlias System.env.AndroidSigningKeyAlias
+                keyPassword System.env.AndroidSigningKeyPassword
+                storeFile file(System.env.AndroidSigningStoreFile)
+                storePassword System.env.AndroidSigningStorePassword
+            }
+            android.buildTypes.release.signingConfig = signingConfigs.release
+        }
+    } else {
+        println "No signing properties found"
+        android.buildTypes.release.signingConfig = null
+    }
+}
+
+android.applicationVariants.all { variant ->
+    variant.mergeAssets.doLast {
+        copy {
+            from project.rootDir
+            into "${project.buildDir}/intermediates/assets/${variant.buildType.name}"
+            include 'LICENSE.txt'
+            include 'LICENSE-rhyming-dictionary.txt'
+            include 'LICENSE-thesaurus-wordnet.txt'
+            include 'LICENSE-dictionary-wordnet.txt'
+            include 'LICENSE-google-ngram-dataset.txt'
+        }
+    }
+}
+
+repositories {
+    jcenter();
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.7.1'
+        classpath 'me.tatarka:gradle-retrolambda:3.6.1'
+    }
+}
+
+dependencies {
+    annotationProcessor 'org.jraf:prefs-compiler:1.1.1'
+
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:preference-v7:25.3.1'
+    compile 'com.android.support:preference-v14:25.3.1'
+    compile 'org.greenrobot:eventbus:3.0.0'
+    compile 'ca.rmen:rhymer:1.2.0'
+    compile 'ca.rmen:porter-stemmer:1.0.0'
+    compile 'org.jraf:prefs:1.1.1'
+    compile 'com.google.dagger:dagger:2.11'
+    compile "io.reactivex.rxjava2:rxjava:2.1.1"
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
+
+    testCompile 'junit:junit:4.12'
+    testCompile "org.robolectric:robolectric:3.3.2"
+
+
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    androidTestCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestCompile 'com.android.support.test.espresso:espresso-intents:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestCompile 'com.android.support.test.espresso:espresso-contrib:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'design'
+        exclude group: 'com.android.support', module: 'recyclerview-v7'
+    }
+}
+
+// Only show real releases with the ben-manes plugin.
+dependencyUpdates.resolutionStrategy = {
+    componentSelection { rules ->
+        rules.all { ComponentSelection selection ->
+            boolean rejected = ['alpha', 'alpha-preview', 'beta', 'rc', 'cr', 'm'].any { qualifier ->
+                selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+            }
+            if (rejected) {
+                selection.reject('Release candidate')
+            }
+        }
+    }
+}
+task jacocoTestReport(type: JacocoReport, dependsOn: ["testDebugUnitTest", "createDebugCoverageReport"]) {
+    reports {
+        html.enabled = true
+    }
+    classDirectories = fileTree(
+            dir: "${buildDir}/intermediates/classes/debug",
+            excludes: ["**/R.class", "**/R*.class", "**/Manifest.class", "**/Manifest*.class", "**/BuildConfig.class",
+                       // ignore databinding generated code:
+                       "com/thearch/speakdict/databinding/*.class",
+                       "com/thearch/speakdict/BR.class",
+                       // ignore dagger generated code:
+                       "com/thearch/speakdict/settings/SettingsEditorWrapper.class",
+                       "com/thearch/speakdict/settings/SettingsPrefs.class",
+                       "com/thearch/speakdict/**/DaggerAppComponent*.class",
+                       "com/thearch/speakdict/**/*_Factory.class",
+                       "com/thearch/speakdict/**/*_Provides*.class",
+                       "com/thearch/speakdict/**/*Injector.class",
+                       // ignore generated code not in our package
+                       "android/databinding/**/*.class",
+                       "com/android/**/*.class"])
+    sourceDirectories = files("${project.projectDir}/src/main/java")
+    executionData = fileTree(
+            dir: "${buildDir}",
+            includes: [
+                    "jacoco/testDebugUnitTest.exec",
+                    "outputs/code-coverage/connected/*coverage.ec"
+            ])
+}

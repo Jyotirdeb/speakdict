@@ -1,0 +1,116 @@
+/*
+ * Copyright (c) 2016 Jyotirdeb Mukherjee
+ *
+ * This file is part of SpeakDict.
+ *
+ * SpeakDict is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SpeakDict is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with SpeakDict.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.thearch.speakdict.main.dictionaries.rt;
+
+import android.database.Cursor;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import com.thearch.speakdict.main.dictionaries.EmbeddedDb;
+import com.thearch.speakdict.main.dictionaries.textprocessing.WordSimilarities;
+
+public class Thesaurus {
+
+    private final EmbeddedDb mEmbeddedDb;
+
+    @Inject
+    public Thesaurus(EmbeddedDb embeddedDb) {
+        mEmbeddedDb = embeddedDb;
+    }
+
+    public boolean isLoaded() {
+        return mEmbeddedDb.isLoaded();
+    }
+
+    @NonNull
+    ThesaurusEntry lookup(String word) {
+        String[] projection = new String[]{"word_type", "synonyms", "antonyms"};
+        String selection = "word=?";
+        String[] selectionArgs = new String[]{word};
+        String lookupWord = word;
+        Cursor cursor = mEmbeddedDb.query("thesaurus", projection, selection, selectionArgs);
+
+        if (cursor != null && cursor.getCount() == 0) {
+            String closestWord = new WordSimilarities().findClosestWord(word, mEmbeddedDb);
+            if (closestWord != null) {
+                lookupWord = closestWord;
+                cursor.close();
+                selectionArgs = new String[]{lookupWord};
+                cursor = mEmbeddedDb.query("thesaurus", projection, selection, selectionArgs);
+            }
+        }
+
+        if (cursor != null) {
+            ThesaurusEntry.ThesaurusEntryDetails[] result = new ThesaurusEntry.ThesaurusEntryDetails[cursor.getCount()];
+            try {
+                while (cursor.moveToNext()) {
+                    ThesaurusEntry.WordType wordType = ThesaurusEntry.WordType.valueOf(cursor.getString(0));
+                    String synonymsList = cursor.getString(1);
+                    String antonymsList = cursor.getString(2);
+                    String[] synonyms = split(synonymsList);
+                    String[] antonyms = split(antonymsList);
+                    result[cursor.getPosition()] = new ThesaurusEntry.ThesaurusEntryDetails(wordType, synonyms, antonyms);
+                }
+                return new ThesaurusEntry(lookupWord, result);
+            } finally {
+                cursor.close();
+            }
+        }
+        return new ThesaurusEntry(word, new ThesaurusEntry.ThesaurusEntryDetails[0]);
+    }
+
+    /**
+     * @return the synonyms of the given word, in any order.
+     */
+    @NonNull
+    Set<String> getFlatSynonyms(String word) {
+        Set<String> flatSynonyms = new HashSet<>();
+
+        String[] projection = new String[]{"synonyms"};
+        String selection = "word=?";
+        String[] selectionArgs = new String[]{word};
+        Cursor cursor = mEmbeddedDb.query("thesaurus", projection, selection, selectionArgs);
+        if (cursor != null) {
+            try {
+                while (cursor.moveToNext()) {
+                    String synonymsList = cursor.getString(0);
+                    String[] synonyms = split(synonymsList);
+                    Collections.addAll(flatSynonyms, synonyms);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return flatSynonyms;
+    }
+
+    private static String[] split(String string) {
+        if (TextUtils.isEmpty(string)) return new String[0];
+        return string.split(",");
+    }
+
+
+}
